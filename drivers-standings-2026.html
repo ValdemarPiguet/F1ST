@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>F1ST — Drivers Championship Standings 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f2f0eb;
+      --bg2:       #e8e5de;
+      --bg3:       #dedad2;
+      --border:    #c8c4bc;
+      --border2:   #b0aba0;
+      --red:       #e10600;
+      --red-bright:#ff1a15;
+      --red-dim:   rgba(225,6,0,0.08);
+      --text:      #1c1c1c;
+      --text-dim:  #3a3a3a;
+      --text-muted:#7a7870;
+      --gold:      #7a5e00;
+      --gold-bright:#c9a84c;
+      --green:     #1a6e3a;
+      --silver:    #5a5a5a;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .logo-text {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #111;
+    }
+    .logo-text span { color: var(--red-bright); }
+
+    nav { display: flex; align-items: center; }
+
+    nav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      padding: 0 1rem;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    nav a:hover, nav a.active {
+      color: var(--red);
+      border-bottom-color: var(--red);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .badge-season {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 0.2rem 0.6rem;
+      background: rgba(201,168,76,0.06);
+    }
+
+    .btn-primary {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #fff !important;
+      background: var(--red);
+      border: none;
+      padding: 0.4rem 1rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    .btn-primary:hover { background: var(--red-bright); }
+
+    /* ── TICKER ── */
+    .ticker {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      height: 32px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .ticker::before, .ticker::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 60px;
+      z-index: 2;
+    }
+    .ticker::before { left: 0; background: linear-gradient(to right, var(--bg2), transparent); }
+    .ticker::after  { right: 0; background: linear-gradient(to left, var(--bg2), transparent); }
+
+    .ticker-track {
+      display: flex;
+      animation: ticker 50s linear infinite;
+      white-space: nowrap;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0 1.5rem;
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      border-right: 1px solid var(--border);
+      text-decoration: none;
+      transition: color 0.15s, background 0.15s;
+      height: 32px;
+      white-space: nowrap;
+    }
+    .ticker-item:hover { color: #111; background: var(--red-dim); cursor: default; }
+
+    .ticker-item .dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 4px var(--red);
+      flex-shrink: 0;
+    }
+    .ticker-item .dot.green { background: var(--green); box-shadow: 0 0 4px var(--green); }
+    .ticker-item .dot.gold  { background: var(--gold-bright); box-shadow: 0 0 4px var(--gold-bright); }
+
+    /* ── GUIDE HERO ── */
+    .guide-hero {
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 2rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .guide-hero-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 50% 120% at 0% 50%, rgba(225,6,0,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
+    .breadcrumb a:hover { color: var(--red-bright); }
+    .breadcrumb .sep { color: var(--text-muted); }
+
+    .guide-hero-inner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 2rem;
+      position: relative;
+    }
+
+    .guide-hero-left { flex: 1; }
+
+    .guide-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .gtag {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      padding: 0.18rem 0.55rem;
+      border: 1px solid;
+    }
+    .gtag.race    { color: var(--red-bright); border-color: rgba(225,6,0,0.3); background: var(--red-dim); }
+    .gtag.circuit { color: var(--gold); border-color: rgba(201,168,76,0.35); background: rgba(201,168,76,0.06); }
+    .gtag.green   { color: var(--green); border-color: rgba(39,174,96,0.3); background: rgba(39,174,96,0.05); }
+
+    .guide-title {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 700;
+      color: #111;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 0.6rem;
+    }
+
+    .guide-subtitle {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      max-width: 560px;
+      margin-bottom: 1.5rem;
+    }
+
+    .guide-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+    .meta-item strong { color: var(--text-dim); font-weight: 500; }
+
+    .guide-hero-right {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: center; /* keep children centered so badge aligns under name */
+      flex-shrink: 0;
+    }
+
+    .rating-box {
+      border: 1px solid var(--border2);
+      background: var(--bg2);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 140px;
+    }
+    .rating-val {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold-bright);
+      display: block;
+      line-height: 1.2;
+    }
+    .rating-label {
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.3rem;
+    }
+    .tier-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      padding: 0.3rem 1rem;
+      background: var(--red);
+      color: #fff;
+      text-align: center;
+      white-space: nowrap;
+      width: 100%;        /* stretch to match container (which reflects leader width) */
+      box-sizing: border-box;
+    }
+
+    /* ── PAGE LAYOUT ── */
+    .page-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      max-width: 1280px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    .guide-content {
+      /* separator no longer needed */
+      min-height: 100vh;
+    }
+
+    .guide-section {
+      padding: 2.5rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      scroll-margin-top: 80px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .section-num {
+      font-size: 0.58rem;
+      font-weight: 700;
+      color: var(--red-bright);
+      letter-spacing: 0.15em;
+      background: var(--red-dim);
+      border: 1px solid rgba(225,6,0,0.2);
+      padding: 0.2rem 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .section-heading h2 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #111;
+    }
+
+    /* ── DRIVER CARD (quote-style) ── */
+    .driver-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .driver-card {
+      position: relative;
+    }
+
+    .driver-team-label {
+      display: inline-block;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--red-bright);
+      background: var(--red-dim);
+      border: 1px solid rgba(225,6,0,0.2);
+      padding: 0.2rem 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .driver-block {
+      border-left: 3px solid var(--border2);
+      background: var(--bg2);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .driver-block:hover {
+      background: var(--bg3);
+      border-left-color: var(--red);
+    }
+
+    /* position-specific left border colours */
+    .driver-block.pos-1  { border-left-color: var(--gold-bright); }
+    .driver-block.pos-2  { border-left-color: #aaaaaa; }
+    .driver-block.pos-3  { border-left-color: #8b5a2b; }
+
+    .driver-left {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .driver-pos {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      line-height: 1;
+      min-width: 2rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .driver-pos.p1 { color: var(--gold-bright); }
+    .driver-pos.p2 { color: #aaaaaa; }
+    .driver-pos.p3 { color: #8b5a2b; }
+
+    .driver-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .driver-info { flex: 1; min-width: 0; }
+
+    .driver-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: 0.03em;
+      line-height: 1.2;
+    }
+
+    .driver-abbr {
+      font-size: 0.6rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      margin-top: 0.2rem;
+    }
+
+    .driver-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .driver-pts-wrap {
+      text-align: right;
+    }
+
+    .driver-pts {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #111;
+      line-height: 1;
+      display: block;
+    }
+
+    .driver-pts-label {
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.2rem;
+    }
+
+    .driver-socials {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .social-btn:hover {
+      color: #111;
+      border-color: var(--red);
+      background: var(--red-dim);
+    }
+
+    .social-btn svg {
+      width: 13px;
+      height: 13px;
+      fill: currentColor;
+    }
+
+    /* RIGHT NAV removed: page contains only one section, sidebar unnecessary */
+
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-left { font-size: 0.62rem; color: var(--text-muted); line-height: 1.8; }
+    .footer-right { display: flex; gap: 1.5rem; }
+    .footer-right a {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      transition: color 0.15s;
+    }
+    .footer-right a:hover { color: var(--red-bright); }
+
+    .hamburger { display: none; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .guide-hero > * { animation: fadeUp 0.5s ease both; }
+    .breadcrumb { animation-delay: 0.05s; }
+    .guide-tags { animation-delay: 0.10s; }
+    .guide-title { animation-delay: 0.15s; }
+    .guide-subtitle { animation-delay: 0.20s; }
+    .guide-meta-row { animation-delay: 0.25s; }
+    .guide-hero-right { animation-delay: 0.30s; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      nav { display: none; }
+      nav.open { display: flex; flex-direction: column; position: absolute; top: 48px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 200; }
+      nav.open a { height: 44px; border-bottom: none; border-left: 2px solid transparent; padding: 0 1.5rem; }
+      nav.open a:hover, nav.open a.active { border-left-color: var(--red); border-bottom: none; }
+      .hamburger { display: flex; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; margin-left: 0.5rem; }
+      .hamburger span { width: 18px; height: 2px; background: var(--text-dim); display: block; }
+      .topbar { padding: 0 1rem; position: relative; }
+      .topbar-left { gap: 0.5rem; }
+      .badge-season { display: none; }
+      .btn-primary { font-size: 0.6rem; padding: 0.35rem 0.65rem; }
+      .guide-hero { padding: 1.5rem 1rem 1.25rem; }
+      .guide-hero-inner { flex-direction: column; gap: 1rem; }
+      .guide-hero-right { align-items: flex-start; flex-direction: row; gap: 0.75rem; }
+      .page-layout { grid-template-columns: 1fr; }
+      .guide-nav {
+        position: static;
+        height: auto;
+        border-left: none;
+        border-bottom: 1px solid var(--border);
+        padding: 0.75rem 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        order: -1;
+      }
+      .nav-items { flex-direction: row; white-space: nowrap; padding: 0 1rem; }
+      .nav-item { border-left: none; border-bottom: 2px solid transparent; padding: 0.4rem 0.75rem; font-size: 0.58rem; flex-shrink: 0; }
+      .nav-item.active { border-left-color: transparent; border-bottom-color: var(--red); background: var(--red-dim); }
+      .nav-item-num { display: none; }
+      .nav-label, .nav-divider, .nav-info-box { display: none; }
+      .guide-section { padding: 1.75rem 1rem; }
+      .driver-block { flex-wrap: wrap; gap: 1rem; padding: 0.85rem 1rem; }
+      .driver-right { gap: 1rem; }
+      .driver-pts { font-size: 1rem; }
+      .driver-pos { font-size: 1.2rem; }
+      footer { flex-direction: column; gap: 1.5rem; align-items: flex-start; padding: 1.5rem 1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .guide-title { font-size: 1.4rem; }
+      .driver-name { font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="f1-2026.html" class="logo">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="2" y="2" width="9" height="9" fill="#e10600" opacity="0.9"/>
+        <rect x="11" y="2" width="9" height="9" fill="none" stroke="#e10600" stroke-width="1.2"/>
+        <rect x="2" y="11" width="9" height="9" fill="none" stroke="#e10600" stroke-width="1.2"/>
+        <rect x="11" y="11" width="9" height="9" fill="#e10600" opacity="0.9"/>
+      </svg>
+      <span class="logo-text">F1<span>ST</span></span>
+    </a>
+    <div class="hamburger" onclick="toggleNav()" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+    <nav id="main-nav">
+      <a href="f1-2026.html">MAIN</a>
+      <a href="f1-2026.html#season-races">SEASON RACES</a>
+      <a href="f1-2026.html#world-championship" class="active">WORLD CHAMPIONSHIP</a>
+      <a href="constructors-standings-2026.html">TEAM CHAMPIONSHIP</a>
+    </nav>
+  </div>
+  <div class="topbar-right">
+    <span class="badge-season">◈ SEASON 2026</span>
+    <a href="au-rev-2026.html" class="btn-primary">LAST RACE RECAP</a>
+  </div>
+</header>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="dot gold"></span> VERSTAPPEN leads — 94 pts after R4</span>
+    <span class="ticker-item"><span class="dot"></span> Norris P2 — 78 pts · Gap: -16</span>
+    <span class="ticker-item"><span class="dot green"></span> Leclerc P3 — 71 pts · Ferrari hunting first win</span>
+    <span class="ticker-item"><span class="dot gold"></span> NEXT RACE: Saudi Arabian GP — Apr 20</span>
+    <span class="ticker-item"><span class="dot"></span> Hamilton P4 — 58 pts · Adapting to Ferrari</span>
+    <span class="ticker-item"><span class="dot green"></span> Piastri P5 — 51 pts · Fastest lap Bahrain</span>
+    <span class="ticker-item"><span class="dot"></span> 4 races done · 17 remaining · 2026 season</span>
+    <!-- duplicate -->
+    <span class="ticker-item"><span class="dot gold"></span> VERSTAPPEN leads — 94 pts after R4</span>
+    <span class="ticker-item"><span class="dot"></span> Norris P2 — 78 pts · Gap: -16</span>
+    <span class="ticker-item"><span class="dot green"></span> Leclerc P3 — 71 pts · Ferrari hunting first win</span>
+    <span class="ticker-item"><span class="dot gold"></span> NEXT RACE: Saudi Arabian GP — Apr 20</span>
+    <span class="ticker-item"><span class="dot"></span> Hamilton P4 — 58 pts · Adapting to Ferrari</span>
+    <span class="ticker-item"><span class="dot green"></span> Piastri P5 — 51 pts · Fastest lap Bahrain</span>
+    <span class="ticker-item"><span class="dot"></span> 4 races done · 17 remaining · 2026 season</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="guide-hero">
+  <div class="guide-hero-bg"></div>
+  <div class="breadcrumb">
+    <a href="f1-2026.html">F1DB</a>
+    <span class="sep">/</span>
+    <a href="f1-2026.html#world-championship">WORLD CHAMPIONSHIP</a>
+    <span class="sep">/</span>
+    <span>FULL DRIVERS STANDINGS</span>
+  </div>
+  <div class="guide-hero-inner">
+    <div class="guide-hero-left">
+      <div class="guide-tags">
+        <span class="gtag race">DRIVERS CHAMPIONSHIP</span>
+        <span class="gtag circuit">2026 SEASON</span>
+        <span class="gtag green">AFTER R4 · BAHRAIN</span>
+      </div>
+      <div class="guide-title">World Championship<br>Standings 2026</div>
+      <div class="guide-subtitle">
+        Full driver standings after Round 4 of the 2026 FIA Formula One World Championship. Max Verstappen leads with 94 points — 16 ahead of Norris. 17 rounds remaining.
+      </div>
+      <div class="guide-meta-row">
+        <span class="meta-item">◈ <strong>22</strong> drivers</span>
+        <span class="meta-item">⬡ <strong>10</strong> teams</span>
+        <span class="meta-item">✎ <strong>4/21</strong> races completed</span>
+        <span class="meta-item">⧗ <strong>436</strong> pts distributed</span>
+      </div>
+    </div>
+    <div class="guide-hero-right">
+      <div class="rating-box">
+        <span class="rating-val">VERSTAPPEN</span>
+        <span class="rating-label">CHAMPIONSHIP LEADER</span>
+      </div>
+      <div class="tier-badge">◈ 94 POINTS</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE BODY -->
+<div class="page-layout">
+  <main class="guide-content">
+
+    <section class="guide-section" id="standings">
+      <div class="section-heading">
+        <h2>ALL DRIVERS · 2026 STANDINGS</h2>
+      </div>
+
+      <div class="driver-list">
+
+        <!-- P1 -->
+        <div class="driver-card">
+          <div class="driver-team-label">RED BULL RACING · RED BULL FORD</div>
+          <div class="driver-block pos-1">
+            <div class="driver-left">
+              <span class="driver-pos p1">1</span>
+              <span class="driver-dot" style="background:#3671C6;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Max Verstappen</div>
+                <div class="driver-abbr">VER · 🇳🇱 NED · #3</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">94</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/Max33Verstappen" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/maxverstappen1/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P2 -->
+        <div class="driver-card">
+          <div class="driver-team-label">MCLAREN · MERCEDES</div>
+          <div class="driver-block pos-2">
+            <div class="driver-left">
+              <span class="driver-pos p2">2</span>
+              <span class="driver-dot" style="background:#FF8000;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Lando Norris</div>
+                <div class="driver-abbr">NOR · 🇬🇧 GBR · #1</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">78</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/LandoNorris" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/landonorris/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P3 -->
+        <div class="driver-card">
+          <div class="driver-team-label">SCUDERIA FERRARI</div>
+          <div class="driver-block pos-3">
+            <div class="driver-left">
+              <span class="driver-pos p3">3</span>
+              <span class="driver-dot" style="background:#E8002D;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Charles Leclerc</div>
+                <div class="driver-abbr">LEC · 🇲🇨 MON · #16</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">71</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/Charles_Leclerc" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/charles_leclerc/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P4 -->
+        <div class="driver-card">
+          <div class="driver-team-label">SCUDERIA FERRARI</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">4</span>
+              <span class="driver-dot" style="background:#E8002D;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Lewis Hamilton</div>
+                <div class="driver-abbr">HAM · 🇬🇧 GBR · #44</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">58</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/LewisHamilton" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/lewishamilton/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P5 -->
+        <div class="driver-card">
+          <div class="driver-team-label">MCLAREN · MERCEDES</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">5</span>
+              <span class="driver-dot" style="background:#FF8000;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Oscar Piastri</div>
+                <div class="driver-abbr">PIA · 🇦🇺 AUS · #81</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">51</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/OscarPiastri" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/oscarpiastri/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P6 -->
+        <div class="driver-card">
+          <div class="driver-team-label">MERCEDES-AMG PETRONAS</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">6</span>
+              <span class="driver-dot" style="background:#27F4D2;"></span>
+              <div class="driver-info">
+                <div class="driver-name">George Russell</div>
+                <div class="driver-abbr">RUS · 🇬🇧 GBR · #63</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">44</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/GeorgeRussell63" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/georgerussell63/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P7 -->
+        <div class="driver-card">
+          <div class="driver-team-label">RED BULL RACING · RED BULL FORD</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">7</span>
+              <span class="driver-dot" style="background:#3671C6;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Isack Hadjar</div>
+                <div class="driver-abbr">HAD · 🇫🇷 FRA · #6</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">41</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/SChecoPerez" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/schecoperez/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P8 -->
+        <div class="driver-card">
+          <div class="driver-team-label">WILLIAMS · MERCEDES</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">8</span>
+              <span class="driver-dot" style="background:#64C4FF;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Carlos Sainz</div>
+                <div class="driver-abbr">SAI · 🇪🇸 ESP · #55</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">34</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/Carlossainz55" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/carlossainz55/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P9 -->
+        <div class="driver-card">
+          <div class="driver-team-label">MERCEDES-AMG PETRONAS</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">9</span>
+              <span class="driver-dot" style="background:#27F4D2;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Kimi Antonelli</div>
+                <div class="driver-abbr">ANT · 🇮🇹 ITA · #12</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">29</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/kimiAntonelli" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/kimiantonelli/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P10 -->
+        <div class="driver-card">
+          <div class="driver-team-label">ASTON MARTIN · HONDA</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">10</span>
+              <span class="driver-dot" style="background:#358C75;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Fernando Alonso</div>
+                <div class="driver-abbr">ALO · 🇪🇸 ESP · #14</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">18</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/alo_oficial" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/fernandoalo_oficial/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P11 -->
+        <div class="driver-card">
+          <div class="driver-team-label">ASTON MARTIN · HONDA</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">11</span>
+              <span class="driver-dot" style="background:#358C75;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Lance Stroll</div>
+                <div class="driver-abbr">STR · 🇨🇦 CAN · #18</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">16</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/HulkHulkenberg" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/hulkhulkenberg/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P12 -->
+        <div class="driver-card">
+          <div class="driver-team-label">HAAS F1 TEAM · FERRARI</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">12</span>
+              <span class="driver-dot" style="background:#B6BABD;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Kevin Magnussen</div>
+                <div class="driver-abbr">MAG · 🇩🇰 DEN · #20</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">15</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/KevinMagnussen" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/kevinmagnussen/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P13 -->
+        <div class="driver-card">
+          <div class="driver-team-label">ALPINE · MERCEDES</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">13</span>
+              <span class="driver-dot" style="background:#5E8FAA;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Esteban Ocon</div>
+                <div class="driver-abbr">OCO · 🇫🇷 FRA · #31</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">13</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/OconEsteban" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/estebanocon/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P14 -->
+        <div class="driver-card">
+          <div class="driver-team-label">ALPINE · MERCEDES</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">14</span>
+              <span class="driver-dot" style="background:#5E8FAA;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Pierre Gasly</div>
+                <div class="driver-abbr">GAS · 🇫🇷 FRA · #10</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">11</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/PierreGASLY" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/pierregasly/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P15 -->
+        <div class="driver-card">
+          <div class="driver-team-label">WILLIAMS · MERCEDES</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">15</span>
+              <span class="driver-dot" style="background:#64C4FF;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Alexander Albon</div>
+                <div class="driver-abbr">ALB · 🇹🇭 THA · #23</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">10</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/alex_albon" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/alex_albon/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P16 -->
+        <div class="driver-card">
+          <div class="driver-team-label">ALPINE · MERCEDES</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">16</span>
+              <span class="driver-dot" style="background:#5E8FAA;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Franco Colapinto</div>
+                <div class="driver-abbr">COL · 🇦🇷 ARG · #43</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">9</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/FranColapinto" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/francolapinto/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P17 -->
+        <div class="driver-card">
+          <div class="driver-team-label">RB FORMULA ONE · RED BULL FORD</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">17</span>
+              <span class="driver-dot" style="background:#1E41FF;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Arvid Lindblad</div>
+                <div class="driver-abbr">LIN · 🇬🇧 GBR · #44</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">4</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/yukitsunoda07" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/yukitsunoda07/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P18 -->
+        <div class="driver-card">
+          <div class="driver-team-label">RB FORMULA ONE · RED BULL FORD</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">18</span>
+              <span class="driver-dot" style="background:#1E41FF;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Liam Lawson</div>
+                <div class="driver-abbr">LAW · 🇳🇿 NZL · #30</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">2</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/LiamLawson30" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/liamlawson30/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P19 -->
+        <div class="driver-card">
+          <div class="driver-team-label">AUDI REVOLUT F1 TEAM · AUDI</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">19</span>
+              <span class="driver-dot" style="background:#0E0E0E;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Gabriel Bortoleto</div>
+                <div class="driver-abbr">BOR · 🇧🇷 BRA · #5</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">1</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/ZhouGuanyu24" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/zhou.guanyu/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P20 -->
+        <div class="driver-card">
+          <div class="driver-team-label">AUDI REVOLUT F1 TEAM · AUDI</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">20</span>
+              <span class="driver-dot" style="background:#0E0E0E;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Nico Hülkenberg</div>
+                <div class="driver-abbr">HUL · 🇩🇪 GER · #27</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">0</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/ValtteriBottas" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/valtteribottas/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P21 -->
+        <div class="driver-card">
+          <div class="driver-team-label">Cadillac Formula 1 Team · FERRARI</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">21</span>
+              <span class="driver-dot" style="background:#AA0000;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Sergio Pérez</div>
+                <div class="driver-abbr">PER · 🇲🇽 MEX · #11</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">0</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/SChecoPerez" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/sergio_perezf1/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- P22 -->
+        <div class="driver-card">
+          <div class="driver-team-label">Cadillac Formula 1 Team · FERRARI</div>
+          <div class="driver-block">
+            <div class="driver-left">
+              <span class="driver-pos">22</span>
+              <span class="driver-dot" style="background:#AA0000;"></span>
+              <div class="driver-info">
+                <div class="driver-name">Valtteri Bottas</div>
+                <div class="driver-abbr">BOT · 🇫🇮 FIN · #77</div>
+              </div>
+            </div>
+            <div class="driver-right">
+              <div class="driver-pts-wrap">
+                <span class="driver-pts">0</span>
+                <span class="driver-pts-label">POINTS</span>
+              </div>
+              <div class="driver-socials">
+                <a href="https://x.com/ValtteriBottas" target="_blank" class="social-btn" title="X / Twitter">
+                  <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/valtteribottas/" target="_blank" class="social-btn" title="Instagram">
+                  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+
+</div>
+
+<footer>
+  <div class="footer-left">
+    F1DB · UNOFFICIAL FAN STATISTICS SITE<br>
+    NOT AFFILIATED WITH FORMULA ONE GROUP OR FOM<br>
+    FORMULA 1 © 1950–2026 FIA / F1
+  </div>
+  <div class="footer-right">
+    <a href="#">TWITTER / X</a>
+    <a href="#">GITHUB</a>
+    <a href="#">F1.COM</a>
+    <a href="#">CHANGELOG</a>
+  </div>
+</footer>
+
+<script>
+  function toggleNav() {
+    document.getElementById('main-nav').classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
