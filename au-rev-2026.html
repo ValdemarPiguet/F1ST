@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>F1ST — Australian Grand Prix 2026 · Race Results</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f2f0eb;
+      --bg2:       #e8e5de;
+      --bg3:       #dedad2;
+      --border:    #c8c4bc;
+      --border2:   #b0aba0;
+      --red:       #e10600;
+      --red-bright:#ff1a15;
+      --red-glow:  rgba(225,6,0,0.15);
+      --red-dim:   rgba(225,6,0,0.08);
+      --text:      #1c1c1c;
+      --text-dim:  #3a3a3a;
+      --text-muted:#7a7870;
+      --gold:      #7a5e00;
+      --gold-bright:#c9a84c;
+      --green:     #1a6e3a;
+      --silver:    #5a5a5a;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .logo-text {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #111;
+    }
+
+    .logo-text span { color: var(--red-bright); }
+
+    nav { display: flex; align-items: center; }
+
+    nav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      padding: 0 1rem;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    nav a:hover, nav a.active {
+      color: var(--red);
+      border-bottom-color: var(--red);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .badge-season {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 0.2rem 0.6rem;
+      background: rgba(201,168,76,0.06);
+    }
+
+    .btn-primary {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #fff !important;
+      background: var(--red);
+      border: none;
+      padding: 0.4rem 1rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    .btn-primary:hover { background: var(--red-bright); }
+
+    /* ── TICKER ── */
+    .ticker {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      height: 32px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .ticker::before, .ticker::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 60px;
+      z-index: 2;
+    }
+    .ticker::before { left: 0; background: linear-gradient(to right, var(--bg2), transparent); }
+    .ticker::after  { right: 0; background: linear-gradient(to left, var(--bg2), transparent); }
+
+    .ticker-track {
+      display: flex;
+      animation: ticker 50s linear infinite;
+      white-space: nowrap;
+    }
+
+    .ticker-track:hover { animation-play-state: paused; }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0 1.5rem;
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      border-right: 1px solid var(--border);
+      text-decoration: none;
+      transition: color 0.15s, background 0.15s;
+      height: 32px;
+      white-space: nowrap;
+    }
+
+    /* support hover on any ticker item (span or link) */
+    .ticker-item:hover { color: #111; background: var(--red-dim); cursor: default; }
+
+    .ticker-item .dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 4px var(--red);
+      flex-shrink: 0;
+    }
+    .ticker-item .dot.green { background: var(--green); box-shadow: 0 0 4px var(--green); }
+    .ticker-item .dot.gold  { background: var(--gold-bright); box-shadow: 0 0 4px var(--gold-bright); }
+
+    /* ── GUIDE HERO ── */
+    .guide-hero {
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 2rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .guide-hero-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 50% 120% at 0% 50%, rgba(225,6,0,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+
+    .breadcrumb a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .breadcrumb a:hover { color: var(--red-bright); }
+    .breadcrumb .sep { color: var(--text-muted); }
+
+    .guide-hero-inner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 2rem;
+      position: relative;
+    }
+
+    .guide-hero-left { flex: 1; }
+
+    .guide-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .gtag {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      padding: 0.18rem 0.55rem;
+      border: 1px solid;
+    }
+
+    .gtag.race    { color: var(--red-bright);  border-color: rgba(225,6,0,0.3);      background: var(--red-dim); }
+    .gtag.circuit { color: var(--gold);        border-color: rgba(201,168,76,0.35);  background: rgba(201,168,76,0.06); }
+    .gtag.round   { color: var(--silver);      border-color: rgba(90,90,90,0.3);     background: rgba(90,90,90,0.05); }
+    .gtag.green   { color: var(--green);       border-color: rgba(39,174,96,0.3);    background: rgba(39,174,96,0.05); }
+
+    .guide-title {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 700;
+      color: #111;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 0.6rem;
+    }
+
+    .guide-subtitle {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      max-width: 560px;
+      margin-bottom: 1.5rem;
+    }
+
+    .guide-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+
+    .meta-item strong { color: var(--text-dim); font-weight: 500; }
+
+    .guide-hero-right {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: stretch; /* stretch children to equal width */
+      flex-shrink: 0;
+    }
+
+    .rating-box {
+      border: 1px solid var(--border2);
+      background: var(--bg2);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 140px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .rating-val {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold-bright);
+      display: block;
+      line-height: 1.2;
+      letter-spacing: 0.02em;
+    }
+
+    .rating-label {
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.3rem;
+    }
+
+    .tier-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      padding: 0.3rem 1rem;
+      background: var(--red);
+      color: #fff;
+      text-align: center;
+      white-space: nowrap;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* ── PAGE LAYOUT ── */
+    .page-layout {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 0;
+      max-width: 1280px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+      /* ── ANIMATION ── */
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .breadcrumb { animation: fadeUp 0.5s ease 0.05s both; }
+      .guide-tags { animation: fadeUp 0.5s ease 0.10s both; }
+      .guide-title { animation: fadeUp 0.5s ease 0.15s both; }
+      .guide-subtitle { animation: fadeUp 0.5s ease 0.20s both; }
+      .guide-meta-row { animation: fadeUp 0.5s ease 0.25s both; }
+      .guide-hero-right { animation: fadeUp 0.5s ease 0.30s both; }
+
+    /* ── MAIN CONTENT ── */
+    .guide-content {
+      border-right: 1px solid var(--border);
+      min-height: 100vh;
+    }
+
+    .guide-section {
+      padding: 2.5rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      scroll-margin-top: 49px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .section-num {
+      font-size: 0.58rem;
+      font-weight: 700;
+      color: var(--red-bright);
+      letter-spacing: 0.15em;
+      background: var(--red-dim);
+      border: 1px solid rgba(225,6,0,0.2);
+      padding: 0.2rem 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .section-heading h2 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #111;
+    }
+
+    /* ── INFO GRID ── */
+    .ph-row {
+      display: grid;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+
+    .ph-row.cols-2 { grid-template-columns: 1fr 1fr; }
+    .ph-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .ph-row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+    .ph-cell {
+      background: var(--bg2);
+      padding: 1.25rem 1.5rem;
+    }
+
+    .ph-cell-label {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .ph-cell-val {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    .ph-cell-val.highlight { color: #111; }
+    .ph-cell-val.red       { color: var(--red-bright); }
+    .ph-cell-val.gold      { color: var(--gold-bright); }
+    .ph-cell-val.green     { color: var(--green); }
+
+    /* ── WEATHER ICONS ── */
+    .weather-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+
+    .weather-cell {
+      background: var(--bg2);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.3rem;
+    }
+
+    .weather-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .weather-label {
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--text-muted);
+    }
+
+    .weather-val {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .weather-sub {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+    }
+
+    /* ── RESULTS TABLE ── */
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border);
+    }
+
+    .results-table thead tr {
+      background: var(--bg2);
+      border-bottom: 2px solid var(--border2);
+    }
+
+    .results-table th {
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .results-table th:last-child { border-right: none; }
+
+    .results-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+    .results-table tbody tr:last-child { border-bottom: none; }
+    .results-table tbody tr:hover { background: var(--bg3); }
+
+    .results-table tbody tr.winner-row {
+      background: rgba(201,168,76,0.06);
+    }
+    .results-table tbody tr.winner-row:hover {
+      background: rgba(201,168,76,0.1);
+    }
+
+    .results-table tbody tr.dnf-row {
+      opacity: 0.65;
+    }
+
+    .results-table td {
+      font-size: 0.7rem;
+      padding: 0.85rem 1rem;
+      border-right: 1px solid var(--border);
+      color: var(--text-dim);
+      vertical-align: middle;
+    }
+    .results-table td:last-child { border-right: none; }
+
+    .td-pos {
+      font-weight: 700;
+      font-size: 0.82rem;
+      min-width: 3rem;
+      text-align: center;
+    }
+
+    .td-pos.p1 { color: var(--gold-bright); }
+    .td-pos.p2 { color: var(--silver); }
+    .td-pos.p3 { color: #8b5a2b; }
+    .td-pos.dnf { color: var(--red-bright); font-size: 0.65rem; letter-spacing: 0.1em; }
+
+    .td-driver {
+      font-weight: 600;
+      color: #111;
+      letter-spacing: 0.03em;
+    }
+
+    .driver-abbr {
+      font-size: 0.58rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      display: block;
+      margin-top: 0.1rem;
+    }
+
+    .team-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    .td-team { color: var(--text-dim); font-size: 0.65rem; }
+
+    .td-time {
+      font-weight: 500;
+      color: #111;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .td-delta { color: var(--text-muted); font-size: 0.65rem; white-space: nowrap; }
+    .td-delta.fl { color: var(--red-bright); font-weight: 600; }
+
+    .td-pts {
+      font-weight: 700;
+      color: #111;
+      text-align: center;
+    }
+    .td-pts.zero { color: var(--text-muted); font-weight: 400; }
+
+    .fl-badge {
+      display: inline-block;
+      font-size: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--red-bright);
+      border: 1px solid rgba(225,6,0,0.3);
+      background: var(--red-dim);
+      padding: 0.1rem 0.35rem;
+      margin-left: 0.4rem;
+      vertical-align: middle;
+    }
+
+    /* ── RIGHT NAV ── */
+    .guide-nav {
+      position: sticky;
+      top: 48px;
+      height: calc(100vh - 48px);
+      overflow-y: auto;
+      padding: 1.5rem 0;
+      scrollbar-width: none;
+    }
+
+    .guide-nav::-webkit-scrollbar { display: none; }
+
+    .nav-label {
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--text-muted);
+      padding: 0 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .nav-items { display: flex; flex-direction: column; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1.5rem;
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.15s, background 0.15s;
+      border-left: 2px solid transparent;
+      line-height: 1.4;
+    }
+
+    .nav-item:hover { color: #111; background: var(--bg2); }
+
+    .nav-item.active {
+      color: #111;
+      border-left-color: var(--red-bright);
+      background: var(--red-dim);
+    }
+
+    .nav-item-num {
+      font-size: 0.55rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      width: 16px;
+      text-align: right;
+    }
+
+    .nav-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 1rem 1.5rem;
+    }
+
+    .nav-info-box {
+      margin: 0 1.5rem;
+      padding: 0.75rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      line-height: 1.9;
+    }
+
+    .nav-info-box strong { color: var(--text-dim); font-weight: 600; display: block; margin-bottom: 0.25rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-left {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    .footer-right { display: flex; gap: 1.5rem; }
+
+    .footer-right a {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      transition: color 0.15s;
+    }
+    .footer-right a:hover { color: var(--red-bright); }
+
+    .hamburger { display: none; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      nav { display: none; }
+      nav.open { display: flex; flex-direction: column; position: absolute; top: 48px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 200; }
+      nav.open a { height: 44px; border-bottom: none; border-left: 2px solid transparent; padding: 0 1.5rem; }
+      nav.open a:hover, nav.open a.active { border-left-color: var(--red); border-bottom: none; }
+      .hamburger { display: flex; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; margin-left: 0.5rem; }
+      .hamburger span { width: 18px; height: 2px; background: var(--text-dim); display: block; }
+      .topbar { padding: 0 1rem; position: relative; }
+      .topbar-left { gap: 0.5rem; }
+      .badge-season { display: none; }
+      .btn-primary { font-size: 0.6rem; padding: 0.35rem 0.65rem; }
+      .guide-hero { padding: 1.5rem 1rem 1.25rem; }
+      .guide-hero-inner { flex-direction: column; gap: 1rem; }
+      .guide-hero-right { align-items: flex-start; flex-direction: row; gap: 0.75rem; }
+      .page-layout { grid-template-columns: 1fr; }
+      .guide-nav {
+        position: static;
+        height: auto;
+        border-left: none;
+        border-bottom: 1px solid var(--border);
+        padding: 0.75rem 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        order: -1;
+      }
+      .nav-items { flex-direction: row; white-space: nowrap; padding: 0 1rem; }
+      .nav-item { border-left: none; border-bottom: 2px solid transparent; padding: 0.4rem 0.75rem; font-size: 0.58rem; flex-shrink: 0; }
+      .nav-item.active { border-left-color: transparent; border-bottom-color: var(--red); background: var(--red-dim); }
+      .nav-item-num { display: none; }
+      .nav-label, .nav-divider, .nav-info-box { display: none; }
+      .guide-section { padding: 1.75rem 1rem; }
+      .section-heading h2 { font-size: 0.72rem; }
+      .ph-row.cols-2, .ph-row.cols-3, .ph-row.cols-4 { grid-template-columns: 1fr 1fr; }
+      .weather-row { grid-template-columns: 1fr 1fr; }
+      .results-table { font-size: 0.62rem; }
+      .results-table td, .results-table th { padding: 0.6rem 0.6rem; }
+      .td-team { font-size: 0.58rem; }
+      footer { flex-direction: column; gap: 1.5rem; align-items: flex-start; padding: 1.5rem 1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .guide-title { font-size: 1.4rem; }
+      .ph-row.cols-4 { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="index.html" class="logo">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="2" y="2" width="9" height="9" fill="#e10600" opacity="0.9"/>
+        <rect x="11" y="2" width="9" height="9" fill="none" stroke="#e10600" stroke-width="1.2"/>
+        <rect x="2" y="11" width="9" height="9" fill="none" stroke="#e10600" stroke-width="1.2"/>
+        <rect x="11" y="11" width="9" height="9" fill="#e10600" opacity="0.9"/>
+      </svg>
+      <span class="logo-text">F1<span>ST</span></span>
+    </a>
+    <div class="hamburger" onclick="toggleNav()" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+    <nav id="main-nav">
+      <a href="index.html">MAIN</a>
+      <a href="index.html#season-races" class="active">SEASON RACES</a>
+      <a href="index.html#world-championship">WORLD CHAMPIONSHIP</a>
+      <a href="index.html#team-championship">TEAM CHAMPIONSHIP</a>
+    </nav>
+  </div>
+  <div class="topbar-right">
+    <span class="badge-season">◈ SEASON 2026</span>
+    <a href="au-rev-2026.html" class="btn-primary">LAST RACE RECAP</a>
+  </div>
+</header>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="dot gold"></span> R1 WINNER: MAX VERSTAPPEN — Australian GP 2026</span>
+    <span class="ticker-item"><span class="dot green"></span> Verstappen leads championship after Round 1</span>
+    <span class="ticker-item"><span class="dot"></span> Fastest Lap: PIASTRI — 1:20.235</span>
+    <span class="ticker-item"><span class="dot gold"></span> NEXT RACE: Saudi Arabian GP — Apr 20</span>
+    <span class="ticker-item"><span class="dot green"></span> Red Bull 1-2 — Verstappen & Pérez on podium</span>
+    <span class="ticker-item"><span class="dot"></span> Alonso DNF · Lap 38 — Power unit failure</span>
+    <span class="ticker-item"><span class="dot gold"></span> Weather: Sunny · 28°C air · 46°C track</span>
+    <span class="ticker-item"><span class="dot green"></span> Race distance: 58 laps · 307.574 km</span>
+    <!-- duplicate for loop -->
+    <span class="ticker-item"><span class="dot gold"></span> R1 WINNER: MAX VERSTAPPEN — Australian GP 2026</span>
+    <span class="ticker-item"><span class="dot green"></span> Verstappen leads championship after Round 1</span>
+    <span class="ticker-item"><span class="dot"></span> Fastest Lap: PIASTRI — 1:20.235</span>
+    <span class="ticker-item"><span class="dot gold"></span> NEXT RACE: Saudi Arabian GP — Apr 20</span>
+    <span class="ticker-item"><span class="dot green"></span> Red Bull 1-2 — Verstappen & Pérez on podium</span>
+    <span class="ticker-item"><span class="dot"></span> Alonso DNF · Lap 38 — Power unit failure</span>
+    <span class="ticker-item"><span class="dot gold"></span> Weather: Sunny · 28°C air · 46°C track</span>
+    <span class="ticker-item"><span class="dot green"></span> Race distance: 58 laps · 307.574 km</span>
+  </div>
+</div>
+
+<!-- RACE HERO -->
+<div class="guide-hero">
+  <div class="guide-hero-bg"></div>
+  <div class="breadcrumb">
+    <a href="index.html">F1DB</a>
+    <span class="sep">/</span>
+    <a href="index.html#season-races">SEASON RACES</a>
+    <span class="sep">/</span>
+    <span>AUSTRALIAN GRAND PRIX 2026</span>
+  </div>
+  <div class="guide-hero-inner">
+    <div class="guide-hero-left">
+      <div class="guide-tags">
+        <span class="gtag race">RACE RESULT</span>
+        <span class="gtag round">ROUND 01 / 21</span>
+        <span class="gtag circuit">ALBERT PARK · MELBOURNE</span>
+        <span class="gtag green">08 MAR 2026</span>
+      </div>
+      <div class="guide-title">Australian<br>Grand Prix 2026</div>
+      <div class="guide-subtitle">
+        Round 1 of the 2026 FIA Formula One World Championship. 58 laps around the Albert Park Circuit in Melbourne, Australia. Verstappen took pole and converted it to victory, with Red Bull securing a dominant 1-2 finish in the season opener.
+      </div>
+      <div class="guide-meta-row">
+        <span class="meta-item">◈ <strong>58 laps</strong> completed</span>
+        <span class="meta-item">⧗ <strong>1:24:46.018</strong> total time</span>
+        <span class="meta-item">⬡ <strong>307.574 km</strong> distance</span>
+        <span class="meta-item">✎ <strong>20</strong> drivers classified</span>
+      </div>
+    </div>
+    <div class="guide-hero-right">
+      <div class="rating-box">
+        <span class="rating-val">VERSTAPPEN</span>
+        <span class="rating-label">RACE WINNER</span>
+      </div>
+      <div class="tier-badge">🏁 RED BULL RACING</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE BODY -->
+<div class="page-layout">
+
+  <!-- MAIN CONTENT -->
+  <main class="guide-content">
+
+    <!-- 01. GENERAL INFO -->
+    <section class="guide-section" id="general-info">
+      <div class="section-heading">
+        <span class="section-num">01</span>
+        <h2>GENERAL INFO</h2>
+      </div>
+
+      <div class="ph-row cols-3">
+        <div class="ph-cell">
+          <div class="ph-cell-label">CIRCUIT</div>
+          <div class="ph-cell-val highlight">Albert Park</div>
+        </div>
+        <div class="ph-cell">
+          <div class="ph-cell-label">LOCATION</div>
+          <div class="ph-cell-val highlight">Melbourne, Australia</div>
+        </div>
+        <div class="ph-cell">
+          <div class="ph-cell-label">DATE</div>
+          <div class="ph-cell-val highlight">08 March 2026</div>
+        </div>
+      </div>
+
+      <div class="ph-row cols-3">
+        <div class="ph-cell">
+          <div class="ph-cell-label">POLE POSITION</div>
+          <div class="ph-cell-val gold">M. VERSTAPPEN</div>
+        </div>
+        <div class="ph-cell">
+          <div class="ph-cell-label">FASTEST LAP</div>
+          <div class="ph-cell-val red">O. PIASTRI · 1:20.235</div>
+        </div>
+        <div class="ph-cell">
+          <div class="ph-cell-label">LEAD CHANGES</div>
+          <div class="ph-cell-val highlight">2</div>
+        </div>
+      </div>
+
+      <div class="ph-row cols-4">
+        <div class="ph-cell">
+          <div class="ph-cell-label">TOTAL LAPS</div>
+          <div class="ph-cell-val highlight">58</div>
+        </div>
+        <div class="ph-cell">
+          <div class="ph-cell-label">RACE DISTANCE</div>
+          <div class="ph-cell-val highlight">307.574 km</div>
+        </div>
+        <div class="ph-cell">
+          <div class="ph-cell-label">TOTAL RACE TIME</div>
+          <div class="ph-cell-val highlight">1:24:46.018</div>
+        </div>
+        <div class="ph-cell">
+          <div class="ph-cell-label">SAFETY CARS</div>
+          <div class="ph-cell-val highlight">1 VSC · 0 SC</div>
+        </div>
+      </div>
+
+      <div class="ph-row cols-2">
+        <div class="ph-cell">
+          <div class="ph-cell-label">TYRE COMPOUNDS USED</div>
+          <div class="ph-cell-val">Soft (C4) · Medium (C3) · Hard (C2)</div>
+        </div>
+        <div class="ph-cell">
+          <div class="ph-cell-label">DOMINANT STRATEGY</div>
+          <div class="ph-cell-val">Two-stop: S → M → H</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02. RACE WEATHER -->
+    <section class="guide-section" id="race-weather">
+      <div class="section-heading">
+        <span class="section-num">02</span>
+        <h2>RACE WEATHER</h2>
+      </div>
+
+      <div class="weather-row">
+        <div class="weather-cell">
+          <div class="weather-icon">☀️</div>
+          <div class="weather-label">CONDITIONS</div>
+          <div class="weather-val">Sunny</div>
+          <div class="weather-sub">Clear sky, no wind</div>
+        </div>
+        <div class="weather-cell">
+          <div class="weather-icon">🌡️</div>
+          <div class="weather-label">AIR TEMP</div>
+          <div class="weather-val">28°C</div>
+          <div class="weather-sub">Peak at lap 34</div>
+        </div>
+        <div class="weather-cell">
+          <div class="weather-icon">🛣️</div>
+          <div class="weather-label">TRACK TEMP</div>
+          <div class="weather-val">46°C</div>
+          <div class="weather-sub">High degradation</div>
+        </div>
+        <div class="weather-cell">
+          <div class="weather-icon">💧</div>
+          <div class="weather-label">HUMIDITY</div>
+          <div class="weather-val">38%</div>
+          <div class="weather-sub">Dry throughout</div>
+        </div>
+      </div>
+
+      <div class="ph-row cols-2">
+        <div class="ph-cell">
+          <div class="ph-cell-label">WIND SPEED</div>
+          <div class="ph-cell-val highlight">7 km/h · NNW</div>
+        </div>
+        <div class="ph-cell">
+          <div class="ph-cell-label">RAIN PROBABILITY</div>
+          <div class="ph-cell-val green">0% — Fully dry race</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03. DRIVERS RESULTS -->
+    <section class="guide-section" id="drivers-results">
+      <div class="section-heading">
+        <span class="section-num">03</span>
+        <h2>DRIVERS RESULTS</h2>
+      </div>
+
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>POS</th>
+            <th>DRIVER NAME</th>
+            <th>TEAM NAME</th>
+            <th>TOTAL TIME</th>
+            <th>PTS</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr class="winner-row">
+            <td class="td-pos p1">P1</td>
+            <td class="td-driver">
+              Max Verstappen
+              <span class="driver-abbr">VER · NED</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#3671C6;"></span>Red Bull Racing</td>
+            <td class="td-time">1:24:46.018</td>
+            <td class="td-pts">25</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos p2">P2</td>
+            <td class="td-driver">
+              Isack Hadjar
+              <span class="driver-abbr">HAD · FRA</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#3671C6;"></span>Red Bull Racing</td>
+            <td class="td-time">+7.312s</td>
+            <td class="td-pts">18</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos p3">P3</td>
+            <td class="td-driver">
+              Charles Leclerc
+              <span class="driver-abbr">LEC · MON</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#E8002D;"></span>Scuderia Ferrari</td>
+            <td class="td-time">+14.887s</td>
+            <td class="td-pts">15</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P4</td>
+            <td class="td-driver">
+              Lewis Hamilton
+              <span class="driver-abbr">HAM · GBR</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#E8002D;"></span>Scuderia Ferrari</td>
+            <td class="td-time">+21.449s</td>
+            <td class="td-pts">12</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P5</td>
+            <td class="td-driver">
+              Lando Norris
+              <span class="driver-abbr">NOR · GBR</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#FF8000;"></span>McLaren</td>
+            <td class="td-time">+29.003s</td>
+            <td class="td-pts">10</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P6</td>
+            <td class="td-driver">
+              Oscar Piastri <span class="fl-badge">FL</span>
+              <span class="driver-abbr">PIA · AUS</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#FF8000;"></span>McLaren</td>
+            <td class="td-time">+34.118s</td>
+            <td class="td-pts">9</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P7</td>
+            <td class="td-driver">
+              George Russell
+              <span class="driver-abbr">RUS · GBR</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#27F4D2;"></span>Mercedes</td>
+            <td class="td-time">+41.778s</td>
+            <td class="td-pts">6</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P8</td>
+            <td class="td-driver">
+              Kimi Antonelli
+              <span class="driver-abbr">ANT · ITA</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#27F4D2;"></span>Mercedes</td>
+            <td class="td-time">+48.332s</td>
+            <td class="td-pts">4</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P9</td>
+            <td class="td-driver">
+              Carlos Sainz
+              <span class="driver-abbr">SAI · ESP</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#64C4FF;"></span>Williams</td>
+            <td class="td-time">+55.901s</td>
+            <td class="td-pts">2</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P10</td>
+            <td class="td-driver">
+              Nico Hülkenberg
+              <span class="driver-abbr">HUL · GER</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#0E0E0E;"></span>Audi</td>
+            <td class="td-time">+62.447s</td>
+            <td class="td-pts">1</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P11</td>
+            <td class="td-driver">
+              Oliver Bearman
+              <span class="driver-abbr">BER · GBR</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#B6BABD;"></span>Haas</td>
+            <td class="td-time">+68.112s</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P12</td>
+            <td class="td-driver">
+              Franco Colapinto
+              <span class="driver-abbr">COL · ARG</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#5E8FAA;"></span>Alpine</td>
+            <td class="td-time">+71.334s</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P13</td>
+            <td class="td-driver">
+              Pierre Gasly
+              <span class="driver-abbr">GAS · FRA</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#5E8FAA;"></span>Alpine</td>
+            <td class="td-time">+74.889s</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P14</td>
+            <td class="td-driver">
+              Alexander Albon
+              <span class="driver-abbr">ALB · GBR</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#64C4FF;"></span>Williams</td>
+            <td class="td-time">+78.220s</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P15</td>
+            <td class="td-driver">
+              Lance Stroll
+              <span class="driver-abbr">STO · CAN</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#358C75;"></span>Aston Martin</td>
+            <td class="td-time">+81.007s</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P16</td>
+            <td class="td-driver">
+              Yuki Tsunoda
+              <span class="driver-abbr">TSU · JPN</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#1E41FF;"></span>RB Formula One</td>
+            <td class="td-time">+84.443s</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P17</td>
+            <td class="td-driver">
+              Liam Lawson
+              <span class="driver-abbr">LAW · NZL</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#1E41FF;"></span>RB Formula One</td>
+            <td class="td-time">+87.118s</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P18</td>
+            <td class="td-driver">
+              Gabriel Bortoleto
+              <span class="driver-abbr">BOR · BRA</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#0E0E0E;"></span>Audi</td>
+            <td class="td-time">+1 LAP</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P19</td>
+            <td class="td-driver">
+              Valtteri Bottas
+              <span class="driver-abbr">BOT · FIN</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#AA0000;"></span>Cadillac</td>
+            <td class="td-time">+1 LAP</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+
+          <tr>
+            <td class="td-pos">P20</td>
+            <td class="td-driver">
+              Sergio Pérez
+              <span class="driver-abbr">PER · MEX</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#AA0000;"></span>Cadillac</td>
+            <td class="td-time">+1 LAP</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+          
+          <tr>
+            <td class="td-pos">P21</td>
+            <td class="td-driver">
+              Esteban Ocon
+              <span class="driver-abbr">CON · FRA</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#B6BABD;"></span>Haas</td>
+            <td class="td-time">+1 LAP</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+
+          <tr class="dnf-row">
+            <td class="td-pos dnf">DNF</td>
+            <td class="td-driver">
+              Fernando Alonso
+              <span class="driver-abbr">ALO · ESP</span>
+            </td>
+            <td class="td-team"><span class="team-dot" style="background:#358C75;"></span>Aston Martin</td>
+            <td class="td-time">LAP 38</td>
+            <td class="td-pts zero">0</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <!-- RIGHT STICKY NAV -->
+  <aside class="guide-nav">
+    <div class="nav-label">// CONTENTS</div>
+    <nav class="nav-items">
+      <a href="#general-info"    class="nav-item active"><span class="nav-item-num">01</span> General Info</a>
+      <a href="#race-weather"    class="nav-item"><span class="nav-item-num">02</span> Race Weather</a>
+      <a href="#drivers-results" class="nav-item"><span class="nav-item-num">03</span> Drivers Results</a>
+    </nav>
+    <div class="nav-divider"></div>
+    <div class="nav-info-box">
+      <strong>✓ ROUND 01 / 21</strong>
+      08 March 2026<br>
+      Albert Park · Melbourne<br>
+      58 laps · 307.574 km<br>
+      Winner: Verstappen<br>
+      FL: Piastri 1:20.235
+    </div>
+  </aside>
+
+</div>
+
+<footer>
+  <div class="footer-left">
+    F1DB · UNOFFICIAL FAN STATISTICS SITE<br>
+    NOT AFFILIATED WITH FORMULA ONE GROUP OR FOM<br>
+    FORMULA 1 © 1950–2026 FIA / F1
+  </div>
+  <div class="footer-right">
+    <a href="#">TWITTER / X</a>
+    <a href="#">GITHUB</a>
+    <a href="#">F1.COM</a>
+    <a href="#">CHANGELOG</a>
+  </div>
+</footer>
+
+<script>
+  function toggleNav() {
+    document.getElementById('main-nav').classList.toggle('open');
+  }
+
+  // Highlight active nav item on scroll
+  const sections = document.querySelectorAll('.guide-section');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(n => n.classList.remove('active'));
+        const active = document.querySelector(`.nav-item[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
